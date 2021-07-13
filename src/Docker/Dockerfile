@@ -4,8 +4,11 @@ FROM python:3.7
 VOLUME ["/var/cache/apt", "/tmp"]
 
 # xvfb: run x programs with virtual framebuffer
+# curl: invoke slicer download api
+# jq: parse JSON api responses
+# rsync: merge directories
 RUN apt-get update && \
-  apt-get install -y git curl xvfb
+  apt-get install -y git curl xvfb jq rsync
 
 # Slicer Dependencies
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y \
@@ -14,24 +17,23 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y \
   libxcb-image0 libxcb-keysyms1 libxcb-xkb1 libxcb-xinerama0 libdouble-conversion1 \
   libqt5dbus5 libqt5widgets5 libqt5network5 libqt5gui5 libqt5core5a
 
-# Version 4.11.20210226
-ARG SLICER_REVISION="29738"
+WORKDIR /app
+COPY slicer-dl.sh .
 
-# extract chosen slicer revision to /app/Slicer
-RUN mkdir /app
-RUN curl -L "https://download.slicer.org/download?os=linux&revision=$SLICER_REVISION" \
-  | tar xz && mv Slicer-*-linux-amd64 /app/Slicer
+ARG SLICER_ROOT="/app/Slicer"
+ARG SLICER_REVISION="4.11.20210226"
+RUN bash slicer-dl.sh -v "$SLICER_REVISION" -d "$SLICER_ROOT" -s
+
+# invoke slicer-dl twice so that changing SLICER_EXTENSIONS uses cached slicer install
+# space-separated list of extension names
+ARG SLICER_EXTENSIONS="BoneTextureExtension"
+RUN bash slicer-dl.sh -v "$SLICER_REVISION" -d "$SLICER_ROOT" \
+  $(for ext in $SLICER_EXTENSIONS; do echo "-e $ext"; done)
 
 # QT environment variables
 ENV XDG_RUNTIME_DIR="/tmp/runtime-root"
 
-# space-separated list of extension names to install
-ARG SLICER_EXTENSIONS="BoneTextureExtension"
+# generate script to setup slicer environment variables (PATH, LD_LIBRARY_PATH, etc)
+RUN xvfb-run "$SLICER_ROOT"/Slicer --launcher-show-set-environment-commands > /app/slicer-env.sh
 
-# copy to tmp so helper script is not preserved
-COPY extension_installer.py /tmp
-RUN xvfb-run /app/Slicer/Slicer --python-script /tmp/extension_installer.py
-
-# setup slicer environment variables (PATH, LD_LIBRARY_PATH) for interactive bash session
-RUN xvfb-run /app/Slicer/Slicer --launcher-show-set-environment-commands > /app/slicer-env.sh
 ENTRYPOINT bash --init-file /app/slicer-env.sh
