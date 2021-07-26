@@ -10,6 +10,8 @@ VOLUME ["/var/cache/apt", "/tmp"]
 RUN apt-get update && \
   apt-get install -y git curl xvfb jq rsync
 
+RUN pip3 install itk==5.1.1
+
 # Slicer Dependencies
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y \
   libgl1-mesa-dri xserver-xorg-video-dummy xserver-xorg-input-void x11-xserver-utils \
@@ -17,8 +19,9 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y \
   libxcb-image0 libxcb-keysyms1 libxcb-xkb1 libxcb-xinerama0 libdouble-conversion1 \
   libqt5dbus5 libqt5widgets5 libqt5network5 libqt5gui5 libqt5core5a
 
+RUN mkdir /app
 WORKDIR /app
-COPY slicer-dl.sh .
+COPY Docker/slicer-dl.sh .
 
 ARG SLICER_ROOT="/app/Slicer"
 ARG SLICER_REVISION="4.11.20210226"
@@ -36,4 +39,14 @@ ENV XDG_RUNTIME_DIR="/tmp/runtime-root"
 # generate script to setup slicer environment variables (PATH, LD_LIBRARY_PATH, etc)
 RUN xvfb-run "$SLICER_ROOT"/Slicer --launcher-show-set-environment-commands > /app/slicer-env.sh
 
-ENTRYPOINT bash --init-file /app/slicer-env.sh
+RUN mkdir /app/src
+# RUN wget ...
+COPY py /app/src/py/
+COPY sh /app/src/sh/
+
+RUN chmod +x /app/src/sh/RescaleIntensity.sh
+
+RUN mkdir /app/files
+RUN mkdir /app/out
+
+CMD bash --init-file /app/slicer-env.sh
