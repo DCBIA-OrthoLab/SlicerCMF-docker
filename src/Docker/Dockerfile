@@ -8,7 +8,7 @@ VOLUME ["/var/cache/apt", "/tmp"]
 # jq: parse JSON api responses
 # rsync: merge directories
 RUN apt-get update && \
-  apt-get install -y git curl xvfb jq rsync
+  apt-get install -y apt-transport-https apt-utils git curl xvfb jq rsync
 
 RUN pip3 install itk==5.1.1
 
@@ -21,7 +21,7 @@ RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y \
 
 RUN mkdir /app
 WORKDIR /app
-COPY Docker/slicer-dl.sh .
+COPY src/Docker/slicer-dl.sh .
 
 ARG SLICER_ROOT="/app/Slicer"
 ARG SLICER_REVISION="4.11.20210226"
@@ -39,14 +39,4 @@ ENV XDG_RUNTIME_DIR="/tmp/runtime-root"
 # generate script to setup slicer environment variables (PATH, LD_LIBRARY_PATH, etc)
 RUN xvfb-run "$SLICER_ROOT"/Slicer --launcher-show-set-environment-commands > /app/slicer-env.sh
 
-RUN mkdir /app/src
-# RUN wget ...
-COPY py /app/src/py/
-COPY sh /app/src/sh/
-
-RUN chmod +x /app/src/sh/RescaleIntensity.sh
-
-RUN mkdir /app/files
-RUN mkdir /app/out
-
-CMD bash --init-file /app/slicer-env.sh
+ENTRYPOINT bash --init-file /app/slicer-env.sh
