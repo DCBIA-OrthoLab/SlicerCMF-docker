@@ -39,4 +39,9 @@ ENV XDG_RUNTIME_DIR="/tmp/runtime-root"
 # generate script to setup slicer environment variables (PATH, LD_LIBRARY_PATH, etc)
 RUN xvfb-run "$SLICER_ROOT"/Slicer --launcher-show-set-environment-commands > /app/slicer-env.sh
 
-ENTRYPOINT bash --init-file /app/slicer-env.sh
+# ENTRYPOINT bash --init-file /app/slicer-env.sh
+
+RUN mkdir /app/src
+COPY src /app/src/
+
+RUN chmod +x /app/src/sh/BoneTexture.sh

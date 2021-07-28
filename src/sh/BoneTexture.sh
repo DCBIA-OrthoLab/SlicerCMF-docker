@@ -1,7 +1,43 @@
-#!/bin/sh
+#!/bin/bash
 
-# path_CLI_BT="/app/Slicer/Extensions-29402/BoneTextureExtension/lib/Slicer-4.11/cli-modules"
-path_CLI_BT="/Applications/Slicer.app/Contents/Extensions-29738/BoneTextureExtension/lib/Slicer-4.11/cli-modules"
+# Do not remove this line
+# It defines all variable environnements
+source /app/slicer-env.sh
+
+# Path to the cli-modules inside the docker image
+cli_modules_path="/app/Slicer/lib/Slicer-4.11/cli-modules"
+
+
+Help()
+{
+# Display Help
+
+echo "-h|--help                 Print this Help."
+echo
+}
+
+while [ "$1" != "" ]; do
+    case $1 in
+        --inputfile )  shift
+            inputfile=$1;;
+        --outputdir )  shift
+            outputdir=$1;;
+        --references )  shift
+            references=$1;;
+
+        -h | --help )
+            Help
+            exit;;
+        * ) 
+            echo ' - Error: Unsupported flag'
+            Help
+            exit 1
+    esac
+    shift
+done
+
+
+
 
 input_dir=$1
 output_dir=$2
@@ -13,46 +49,39 @@ threshold=$5
 cols=(${@:6})
 cols="${cols:-None}"
 
-GLCM=$path_CLI_BT/ComputeGLCMFeatures
-GLRLM=$path_CLI_BT/ComputeGLRLMFeatures
-BM=$path_CLI_BT/ComputeBMFeatures
+GLCM=$cli_modules_path/ComputeGLCMFeatures
+GLRLM=$cli_modules_path/ComputeGLRLMFeatures
+BM=$cli_modules_path/ComputeBMFeatures
 
 
 dir_BT=($input_dir/*)
 
-for dir in "${dir_BT[@]}"; do
-    if [[ ! -d $output_dir/$(basename $dir) ]]; then
-        mkdir $output_dir/$(basename $dir)
-    fi
+# for dir in "${dir_BT[@]}"; do
+#     if [[ ! -d $output_dir/$(basename $dir) ]]; then
+#         mkdir $output_dir/$(basename $dir)
+#     fi
 
-    files=($dir/*)
-    for file in "${files[@]}"; do
-        filename=$output_dir/$(basename $dir)/$(basename $file)
-        output_filename="${filename%.*}"
+#     files=($dir/*)
+#     for file in "${files[@]}"; do
+#         filename=$output_dir/$(basename $dir)/$(basename $file)
+#         output_filename="${filename%.*}"
 
-        $GLCM $file -p $voxelMin -P $voxelMax --returnparameterfile "$output_filename"_1.csv
-        $GLRLM $file -p $voxelMin -P $voxelMax --returnparameterfile "$output_filename"_2.csv
-        $BM $file -t $threshold --returnparameterfile "$output_filename"_3.csv
+#         $GLCM $file -p $voxelMin -P $voxelMax --returnparameterfile "$output_filename"_1.csv
+#         $GLRLM $file -p $voxelMin -P $voxelMax --returnparameterfile "$output_filename"_2.csv
+#         $BM $file -t $threshold --returnparameterfile "$output_filename"_3.csv
 
-        python3 src/BoneTexture_code/merge_csv.py --csv1 "$output_filename"_1.csv --csv2 "$output_filename"_2.csv --csv3 "$output_filename"_3.csv --out "${filename%.*}".csv
-    done
-done
-
-python3 src/BoneTexture_code/BoneTextureExcel.py -i $output_dir -c ${cols[@]} -o $(dirname $output_dir)/BoneTextureExcel.xlsx
+#         python3 src/BoneTexture_code/merge_csv.py --csv1 "$output_filename"_1.csv --csv2 "$output_filename"_2.csv --csv3 "$output_filename"_3.csv --out "${filename%.*}".csv
+#     done
+# done
 
 
-# echo
-# echo "================================================="
-# echo
-# echo "Input folder : $input_dir"
-# echo "Output folder: $output_dir"
-# echo
-# echo "Voxel Min: $voxelMin"
-# echo "Voxel Max: $voxelMax"
-# echo "Threshold: $threshold"
-# echo 
-# echo "Program Finished"
-# echo "================================================="
+
+
+# python3 src/BoneTexture_code/BoneTextureExcel.py -i $output_dir -c ${cols[@]} -o $(dirname $output_dir)/BoneTextureExcel.xlsx
+
+
+
+
 
 
 

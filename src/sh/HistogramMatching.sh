@@ -1,67 +1,64 @@
-#!/bin/sh
+#!/bin/bash
 
-HM_path="/app/Slicer/lib/Slicer-4.11/cli-modules/HistogramMatching" #Histogram Matching
+# Do not remove this line
+# It defines all variable environnements
+source /app/slicer-env.sh
 
-inputfile=$1
-outputfile=$2
-refs=(${@:3})
-
-
-files=($inputfile/*)
+# Path to the cli-modules inside the docker image
+cli_modules_path="/app/Slicer/lib/Slicer-4.11/cli-modules"
 
 
-for file in "${files[@]}"; do
-    filename=$(basename $file)
-    ext="${filename##*.}"
-    filename="${filename%.*}"
+Help()
+{
+# Display Help
 
-    if [ ! -d $outputfile/$filename ]
-    then
-        mkdir $outputfile/$filename
-    fi
+echo "-h|--help                 Print this Help."
+echo
+}
 
+while [ "$1" != "" ]; do
+    case $1 in
+        --inputfile )  shift
+            inputfile=$1;;
+        --outputdir )  shift
+            outputdir=$1;;
+        --references )  shift
+            references=$1;;
 
-    for ref in "${refs[@]}"; do
-        ref_name=$(basename $ref)
-        split=(${ref_name//_/ })
-        add_ref=${split[0]}_${split[1]}   
-
-        $HM_path $file $ref $outputfile/$filename/${filename}_HM_$add_ref.$ext
-    done
-
+        -h | --help )
+            Help
+            exit;;
+        * ) 
+            echo ' - Error: Unsupported flag'
+            Help
+            exit 1
+    esac
+    shift
 done
 
-echo
-echo "================================================="
-echo
-echo "Input folder : $inputfile"
-echo "Output folder: $outputfile"
-echo
-echo "References: "
+
+echo " ============================== "
+echo " ===== Histogram Matching ===== "
+echo " ============================== "
+
+
+refs=($references/*)
+filename=$(basename $inputfile)
+ext="${filename##*.}"
+filename="${filename%.*}"
+
+if [ ! -d $outputdir/$filename ]
+then
+    mkdir $outputdir/$filename
+fi
+
+
 for ref in "${refs[@]}"; do
-    echo $ref
+    ref_name=$(basename $ref)
+    # split=(${ref_name//_/ })
+    # add_ref=${split[0]}_${split[1]}   
+
+    $cli_modules_path/HistogramMatching $inputfile $ref $outputdir/$filename/${filename}_HM_$ref_name.$ext
 done
-echo 
-echo "Program Finished"
-echo "================================================="
-
-
-
-
-
-
-
-
-# NumberElemFolder=$(ls $inputfile | wc -l)
-
-# echo
-
-# number=($(((RANDOM%NumberElemFolder)+1)) $(((RANDOM%NumberElemFolder)+1)) $(((RANDOM%NumberElemFolder)+1)) $(((RANDOM%NumberElemFolder)+1)) $(((RANDOM%NumberElemFolder)+1)))
-
-
-# for i in "${number[@]}"; do
-#     echo "Random number less than $NumberElemFolder  ---  $i"
-# done
-
 
 
