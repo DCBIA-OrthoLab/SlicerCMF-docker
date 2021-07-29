@@ -8,7 +8,7 @@ VOLUME ["/var/cache/apt", "/tmp"]
 # jq: parse JSON api responses
 # rsync: merge directories
 RUN apt-get update && \
-  apt-get install -y apt-transport-https apt-utils git curl xvfb jq rsync
+  apt-get install -y apt-transport-https apt-utils git curl xvfb jq rsync 
 
 RUN pip3 install itk==5.1.1
 
@@ -41,7 +41,19 @@ RUN xvfb-run "$SLICER_ROOT"/Slicer --launcher-show-set-environment-commands > /a
 
 # ENTRYPOINT bash --init-file /app/slicer-env.sh
 
-RUN mkdir /app/src
-COPY src /app/src/
+# RUN mkdir /app/src
+# COPY src /app/src/
 
-RUN chmod +x /app/src/sh/BoneTexture.sh
+RUN wget https://github.com/DCBIA-OrthoLab/SlicerCMF-docker/archive/refs/tags/1.0.1.zip
+RUN unzip 1.0.1.zip
+RUN mv SlicerCMF-docker-1.0.1/src/ /app/
+RUN rm -rf 1.0.1.zip \
+    rm -rf SlicerCMF-docker-1.0.1
+
+RUN wget https://github.com/DCBIA-OrthoLab/SlicerCMF-docker/releases/download/1.0.1/test_files.zip
+RUN unzip test_files.zip
+RUN rm -rf test_files.zip
+
+RUN mkdir /app/out
+
+RUN chmod +x /app/src/sh/*.sh
