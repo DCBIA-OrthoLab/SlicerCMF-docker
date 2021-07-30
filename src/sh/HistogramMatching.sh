@@ -55,6 +55,7 @@ fi
 
 for ref in "${refs[@]}"; do
     ref_name=$(basename $ref)
+    ref_name="${ref_name%.*}"
     # split=(${ref_name//_/ })
     # add_ref=${split[0]}_${split[1]}   
 

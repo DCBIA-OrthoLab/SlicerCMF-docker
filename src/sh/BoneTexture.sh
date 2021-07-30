@@ -86,6 +86,9 @@ $GLCM $inputfile -p $voxelMin -P $voxelMax --returnparameterfile $tmp_dir/"$outp
 $GLRLM $inputfile -p $voxelMin -P $voxelMax --returnparameterfile $tmp_dir/"$output_filename"_2.csv
 $BM $inputfile -t $threshold --returnparameterfile $tmp_dir/"$output_filename"_3.csv
 
+declare -x "LD_LIBRARY_PATH=/usr/bin/../lib/"
+declare -x "PYTHONPATH=/usr/bin/../lib/python3.7:/usr/bin/../lib/python3.7/lib-dynload:/usr/local/bin/../lib:/usr/local/bin/../lib/python3.7:/usr/local/bin/../lib/python3.7/site-packages:/usr/local/bin/../lib/python3.7/lib-dynload${PYTHONPATH:+:$PYTHONPATH}"
+
 python3 /app/src/py/merge_csv.py --csv1 $tmp_dir/"$output_filename"_1.csv --csv2 $tmp_dir/"$output_filename"_2.csv --csv3 $tmp_dir/"$output_filename"_3.csv --out $outputdir/$output_filename.csv
 # done
 # done

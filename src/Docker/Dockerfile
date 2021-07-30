@@ -41,12 +41,14 @@ RUN xvfb-run "$SLICER_ROOT"/Slicer --launcher-show-set-environment-commands > /a
 
 # ENTRYPOINT bash --init-file /app/slicer-env.sh
 
+RUN mkdir /app/src
+COPY src /app/src
 
-RUN wget https://github.com/DCBIA-OrthoLab/SlicerCMF-docker/archive/refs/tags/1.0.1.zip
-RUN unzip 1.0.1.zip
-RUN mv SlicerCMF-docker-1.0.1/src/ /app/
-RUN rm -rf 1.0.1.zip \
-    rm -rf SlicerCMF-docker-1.0.1
+# RUN wget https://github.com/DCBIA-OrthoLab/SlicerCMF-docker/archive/refs/tags/1.0.1.zip
+# RUN unzip 1.0.1.zip
+# RUN mv SlicerCMF-docker-1.0.1/src/ /app/
+# RUN rm -rf 1.0.1.zip \
+#     rm -rf SlicerCMF-docker-1.0.1
 
 WORKDIR /app
 RUN wget https://github.com/DCBIA-OrthoLab/SlicerCMF-docker/releases/download/1.0.1/test_files.zip
@@ -54,6 +56,7 @@ RUN unzip test_files.zip
 RUN rm -rf test_files.zip
 
 RUN mkdir /app/out
+RUN mkdir /app/tmp
 
 RUN chmod +x /app/src/sh/*.sh
 ENV PATH=/app/src/sh/:$PATH
