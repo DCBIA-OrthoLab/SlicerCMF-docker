@@ -1,0 +1,64 @@
+FROM python:3.7
+
+# Directories that don't need to be preserved in images
+VOLUME ["/var/cache/apt", "/tmp"]
+
+# xvfb: run x programs with virtual framebuffer
+# curl: invoke slicer download api
+# jq: parse JSON api responses
+# rsync: merge directories
+RUN apt-get update && \
+  apt-get install -y apt-transport-https apt-utils git curl xvfb jq rsync
+
+RUN pip3 install itk==5.1.1 pandas==1.2.0 xlsxwriter==1.3.8 cmake
+
+RUN mkdir /app
+WORKDIR /app
+
+RUN wget https://github.com/InsightSoftwareConsortium/ITK/archive/refs/heads/master.zip
+RUN unzip master.zip
+RUN rm -rf master.zip
+RUN mkdir /app/build_ITK
+WORKDIR /app/build_ITK
+RUN cmake ../ITK-master
+RUN make
+ENV CMAKE_PREFIX_PATH=/app/build_ITK/:$CMAKE_PREFIX_PATH
+
+WORKDIR /app
+RUN wget https://github.com/Slicer/SlicerExecutionModel/archive/refs/heads/master.zip
+RUN unzip master.zip
+RUN rm -rf master.zip
+RUN mkdir /app/build_SlicerExecutionModel
+WORKDIR /app/build_SlicerExecutionModel
+RUN cmake ../SlicerExecutionModel-master
+RUN make
+ENV CMAKE_PREFIX_PATH=/app/build_SlicerExecutionModel/:$CMAKE_PREFIX_PATH
+
+WORKDIR /app
+RUN wget https://github.com/bpaniagua/ImageNoise/archive/refs/heads/master.zip
+RUN unzip master.zip
+RUN rm -rf master.zip
+RUN mkdir /app/build_ImageNoise
+WORKDIR /app/build_ImageNoise
+RUN cmake ../ImageNoise-master
+RUN make
+
+
+RUN mkdir /app/src
+COPY src /app/src/
+
+# RUN wget https://github.com/DCBIA-OrthoLab/SlicerCMF-docker/archive/refs/tags/1.0.1.zip
+# RUN unzip 1.0.1.zip
+# RUN mv SlicerCMF-docker-1.0.1/src/ /app/
+# RUN rm -rf 1.0.1.zip \
+#     rm -rf SlicerCMF-docker-1.0.1
+
+WORKDIR /app
+RUN wget https://github.com/DCBIA-OrthoLab/SlicerCMF-docker/releases/download/1.0.1/test_files.zip
+RUN unzip test_files.zip
+RUN rm -rf test_files.zip
+
+RUN mkdir /app/out
+
+RUN chmod +x /app/src/sh/*.sh
+ENV PATH=/app/src/sh/:$PATH
