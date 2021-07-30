@@ -50,8 +50,8 @@ if __name__ ==  '__main__':
 
 	output_params = parser.add_argument_group('Output parameters')
 	output_params.add_argument('--out', type=str, help='Output filename', required=True)
-	output_params.add_argument('--min', type=str, help='Minimum', required=True)
-	output_params.add_argument('--max', type=str, help='Maximum', required=True)
+	output_params.add_argument('--min', type=int, help='Minimum', required=True)
+	output_params.add_argument('--max', type=int, help='Maximum', required=True)
 
 	args = parser.parse_args()
 
