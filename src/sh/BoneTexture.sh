@@ -82,15 +82,15 @@ BM=$cli_modules_path/ComputeBMFeatures
 basename="$(basename $inputfile)"
 output_filename="${basename%.*}"
 
-$GLCM $file -p $voxelMin -P $voxelMax --returnparameterfile $tmp_dir/"$output_filename"_1.csv
-$GLRLM $file -p $voxelMin -P $voxelMax --returnparameterfile $tmp_dir/"$output_filename"_2.csv
-$BM $file -t $threshold --returnparameterfile $tmp_dir/"$output_filename"_3.csv
+$GLCM $inputfile -p $voxelMin -P $voxelMax --returnparameterfile $tmp_dir/"$output_filename"_1.csv
+$GLRLM $inputfile -p $voxelMin -P $voxelMax --returnparameterfile $tmp_dir/"$output_filename"_2.csv
+$BM $inputfile -t $threshold --returnparameterfile $tmp_dir/"$output_filename"_3.csv
 
 python3 /app/src/py/merge_csv.py --csv1 $tmp_dir/"$output_filename"_1.csv --csv2 $tmp_dir/"$output_filename"_2.csv --csv3 $tmp_dir/"$output_filename"_3.csv --out $outputdir/$output_filename.csv
 # done
 # done
 
-
+echo "Bone Texture csv file created"
 
 
 # python3 /app/src/py/BoneTextureExcel.py -i $output_dir -c ${cols[@]} -o $(dirname $output_dir)/BoneTextureExcel.xlsx

@@ -8,9 +8,9 @@ VOLUME ["/var/cache/apt", "/tmp"]
 # jq: parse JSON api responses
 # rsync: merge directories
 RUN apt-get update && \
-  apt-get install -y apt-transport-https apt-utils git curl xvfb jq rsync 
+  apt-get install -y apt-transport-https apt-utils git curl xvfb jq rsync
 
-RUN pip3 install itk==5.1.1
+RUN pip3 install itk==5.1.1 pandas==1.2.0 xlsxwriter==1.3.8 cmake
 
 # Slicer Dependencies
 RUN DEBIAN_FRONTEND="noninteractive" apt-get install -y \
@@ -50,10 +50,12 @@ RUN mv SlicerCMF-docker-1.0.1/src/ /app/
 RUN rm -rf 1.0.1.zip \
     rm -rf SlicerCMF-docker-1.0.1
 
+WORKDIR /app
 RUN wget https://github.com/DCBIA-OrthoLab/SlicerCMF-docker/releases/download/1.0.1/test_files.zip
 RUN unzip test_files.zip
 RUN rm -rf test_files.zip
 
 RUN mkdir /app/out
 
-RUN chmod +x /app/src/sh/*.sh
+# RUN chmod +x /app/src/sh/*.sh
+ENV PATH=/app/src/sh/:$PATH
