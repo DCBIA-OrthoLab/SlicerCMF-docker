@@ -12,7 +12,7 @@ def main(args):
     if not os.path.exists(os.path.dirname(out)):
         os.makedirs(os.path.dirname(out))
 
-    ImageType = itk.Image[itk.SS, 3]
+    ImageType = itk.Image[itk.F, 3]
     reader = itk.ImageFileReader[ImageType].New(FileName=img)
     reader.Update()
     itk_img = reader.GetOutput()
