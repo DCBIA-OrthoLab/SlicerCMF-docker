@@ -82,26 +82,15 @@ BM=$cli_modules_path/ComputeBMFeatures
 basename="$(basename $inputfile)"
 output_filename="${basename%.*}"
 
-$GLCM $inputfile -p $voxelMin -P $voxelMax --returnparameterfile $tmp_dir/"$output_filename"_1.csv
-$GLRLM $inputfile -p $voxelMin -P $voxelMax --returnparameterfile $tmp_dir/"$output_filename"_2.csv
-$BM $inputfile -t $threshold --returnparameterfile $tmp_dir/"$output_filename"_3.csv
+$GLCM $inputfile -p $voxelMin -P $voxelMax --returnparameterfile $tmp_dir/"$output_filename"_1.txt
+$GLRLM $inputfile -p $voxelMin -P $voxelMax --returnparameterfile $tmp_dir/"$output_filename"_2.txt
+$BM $inputfile -t $threshold --returnparameterfile $tmp_dir/"$output_filename"_3.txt
 
 declare -x "LD_LIBRARY_PATH=/usr/bin/../lib/"
 declare -x "PYTHONPATH=/usr/bin/../lib/python3.7:/usr/bin/../lib/python3.7/lib-dynload:/usr/local/bin/../lib:/usr/local/bin/../lib/python3.7:/usr/local/bin/../lib/python3.7/site-packages:/usr/local/bin/../lib/python3.7/lib-dynload${PYTHONPATH:+:$PYTHONPATH}"
 
-python3 /app/src/py/merge_csv.py --csv1 $tmp_dir/"$output_filename"_1.csv --csv2 $tmp_dir/"$output_filename"_2.csv --csv3 $tmp_dir/"$output_filename"_3.csv --out $outputdir/$output_filename.csv
+python3 /app/src/py/merge_bonetexture_output.py --file1 $tmp_dir/"$output_filename"_1.txt --file2 $tmp_dir/"$output_filename"_2.txt --file3 $tmp_dir/"$output_filename"_3.txt --out $outputdir/$output_filename.csv
 # done
 # done
 
 echo "Bone Texture csv file created"
-
-
-# python3 /app/src/py/BoneTextureExcel.py -i $output_dir -c ${cols[@]} -o $(dirname $output_dir)/BoneTextureExcel.xlsx
-
-
-
-
-
-
-
-
